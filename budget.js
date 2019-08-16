@@ -46,12 +46,8 @@ const applyEvents = (list, date, sign, eventList) => {
   return list.filter(c => c.date.isSame(date, 'day')).reduce((acc, val) => {
     //console.log(`${val.name}: ${sign}${accounting.formatMoney(val.amount)}`);
     eventList.push({
-      point: {
-        xAxis: 0,
-        yAxis: 0,
-        x: date.valueOf(),
-        y: val.amount,
-      },
+      x: date.valueOf(),
+      y: sign === '-' ? val.amount * -1 : val.amount,
       text: `${val.name}: ${sign}${accounting.formatMoney(val.amount)}`,
     });
     return acc + val.amount;
@@ -77,9 +73,24 @@ const runBudget = (startingMoney, startingTime, pay, expenses) => {
     money -= applyEvents(debits, today, '-', debitEvents);
     //console.log('Balance: ', accounting.formatMoney(money));
     //console.log(' ');
-    balance.push([today.valueOf(), money]);
+    balance.push({ x: today.valueOf(), y: money});
   }
-  return { balance, creditEvents, debitEvents };
+  const eventsMap = [...creditEvents, ...debitEvents]
+    .reduce((acc, val) => {
+      const existing = acc.get(val.x);
+      if (existing) {
+        acc.set(val.x, {
+          ...existing,
+          text: `${existing.text}<br />${val.text}`
+        });
+      } else {
+        acc.set(val.x, val);
+      }
+      return acc;
+    }, new Map())
+    .values();
+    
+  return { balance, events: [...eventsMap].sort((a, b) => a.x > b.x ? 1 : -1) };
 };
 
 //const month = runBudget(1687, moment(), pay, expenses);
