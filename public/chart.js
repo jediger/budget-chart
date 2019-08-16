@@ -13,7 +13,7 @@ const buildChart = (data) => {
       type: 'line'
     },
     title: {
-      text: 'Balance'
+      text: `Budget for ${moment(data.balance[0].x).format('MMMM, YYYY')}`
     },
     xAxis: {
       tickInterval: 24 * 3600 * 1000, // one day
@@ -26,7 +26,9 @@ const buildChart = (data) => {
         text: '$'
       },
       labels: {
-        format: '${value}'
+        formatter: function() {
+          return `${this.value < 0 ? '-' : ''}$${Math.abs(this.value)}`;
+        }
       }
     },
     tooltip: {
@@ -43,9 +45,10 @@ const buildChart = (data) => {
     },
     series: [{
       name: 'Balance',
-      type: 'spline',
+      type: 'area',
       data: data.balance,
-      negativeColor: '#FF0000'
+      color: '#00009966',
+      negativeColor: '#FF000066'
     }, {
       name: 'Events',
       type: 'column',
@@ -71,10 +74,12 @@ const updateChart = (balance, startDate) => {
 (() => {
   const balanceField = document.getElementById('balance');
   const startDateField = document.getElementById('startDate');
+
+  startDateField.value = moment().format('YYYY-MM-DD');
+
   document.getElementById('form').addEventListener('submit', (e) => {
     e.preventDefault();
     updateChart(balanceField.value, startDateField.value);
-    console.log(e);
   });
   updateChart(balanceField.value, startDateField.value);
 })();

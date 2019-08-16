@@ -1,16 +1,16 @@
 const accounting = require('accounting');
 const moment = require('moment');
 
-const expenses = require('./expenses.json');
-const pay = require('./pay.json');
-
 const advanceTime = (frequency, date) => {
   switch (frequency) {
     case 1:
       date.add(1, 'year');
       break;
-    case 6:
+    case 2:
       date.add(6, 'months');
+      break;
+    case 6:
+      date.add(2, 'months');
       break;
     case 12:
       date.add(1, 'month');
@@ -20,6 +20,9 @@ const advanceTime = (frequency, date) => {
       break;
     case 26:
       date.add(2, 'weeks');
+      break;
+    case 52:
+      date.add(1, 'week');
       break;
     default:
       throw new Error('Invalid frequency');
@@ -64,18 +67,17 @@ const runBudget = (startingMoney, startingTime, pay, expenses) => {
 
   let money = startingMoney;
   const balance = [];
-  const creditEvents = [];
-  const debitEvents = [];
+  const rawEvents = [];
   for (let i = 0; i < 30; i++) {
     const today = moment(startingTime).add(i, 'days');
     //console.log(`${today.format('Do')}: `);
-    money += applyEvents(credits, today, '+', creditEvents);
-    money -= applyEvents(debits, today, '-', debitEvents);
+    money += applyEvents(credits, today, '+', rawEvents);
+    money -= applyEvents(debits, today, '-', rawEvents);
     //console.log('Balance: ', accounting.formatMoney(money));
     //console.log(' ');
     balance.push({ x: today.valueOf(), y: money});
   }
-  const eventsMap = [...creditEvents, ...debitEvents]
+  const eventsList = rawEvents
     .reduce((acc, val) => {
       const existing = acc.get(val.x);
       if (existing) {
@@ -90,7 +92,7 @@ const runBudget = (startingMoney, startingTime, pay, expenses) => {
     }, new Map())
     .values();
     
-  return { balance, events: [...eventsMap].sort((a, b) => a.x > b.x ? 1 : -1) };
+  return { balance, events: [...eventsList].sort((a, b) => a.x > b.x ? 1 : -1) };
 };
 
 //const month = runBudget(1687, moment(), pay, expenses);

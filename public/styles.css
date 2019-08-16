@@ -1,0 +1,26 @@
+body {
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+#form {
+  padding: 5px;
+  background: rgba(0,0,0,0.1);
+}
+
+.form-section {
+  display: inline-block;
+  margin: 0 5px 0 0;
+}
+
+#form label {
+  text-transform: uppercase;
+  font-size: .8em;
+}
+
+#form button {
+  text-transform: uppercase;
+  font-size: .8em;
+  background: #aaa;
+  border: none;
+  cursor: pointer;
+}
